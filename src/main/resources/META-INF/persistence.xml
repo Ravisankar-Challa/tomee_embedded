@@ -1,12 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
 	<persistence-unit name="tomee_embedded">
-		<jta-data-source>java:comp/DefaultDataSource</jta-data-source>
+		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+	    <jta-data-source>java:comp/DefaultDataSource</jta-data-source>
+		<class>com.example.entity.Student</class>
+		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		<properties>
+		    <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
 			<property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(foreignKeys=true,schemaAction='dropDB,add')"/>
 			<property name="openjpa.jdbc.SchemaFactory" value="native(foreignKeys=true)" />
 			<property name="openjpa.jdbc.MappingDefaults" value="ForeignKeyDeleteAction=restrict, JoinForeignKeyDeleteAction=restrict"/>
 			<property name="openjpa.Log" value="DefaultLevel=INFO,SQL=TRACE" />
+			<property name="openejb.jpa.init-entitymanager" value="true" />
+		    <property name="openejb.jpa.auto-scan" value="true" />
+		    <property name="openejb.jpa.auto-scan.package" value="com.example" />
+		    <property name="openjpa.RuntimeUnenhancedClasses" value="unsupported"/>
+		    <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
+		    <property name="javax.persistence.schema-generation.create-source" value="metadata"/>
+		    <property name="javax.persistence.schema-generation.drop-source" value="metadata"/>
 		</properties>
 	</persistence-unit>
 </persistence>

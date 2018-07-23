@@ -11,7 +11,10 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import com.example.entity.Student;
 import com.example.respository.StudentRespository;
@@ -26,8 +29,9 @@ public class StudentResource {
 	@Path("student")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Student addStudent(Student student) {
-		return repository.addStudent(student);
+	public Response addStudent(@Context UriInfo uriInfo, Student student) {
+		Student s= repository.addStudent(student);
+		return Response.created(uriInfo.getAbsolutePathBuilder().path(String.valueOf(s.getId())).build()).build();
 	}
 	
 	@GET
@@ -47,14 +51,16 @@ public class StudentResource {
 	@PUT
 	@Path("student")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void updateStudent(Student student) {
-		repository.updateStudent(student);		
+	public Response updateStudent(Student student) {
+		repository.updateStudent(student);	
+		return Response.noContent().build();
 	}
 	
 	@DELETE
 	@Path("student/{id}")
-	public void removeStudentById(Long id) {
+	public Response removeStudentById(@PathParam("id") Long id) {
 		repository.removeStudentById(id);
+		return Response.noContent().build();
 	}
 	
 }

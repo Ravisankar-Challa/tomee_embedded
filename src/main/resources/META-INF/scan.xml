@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<scan>
+ <packages>
+  <package>com.example</package>
+  <package>org.tomitribe.sabot</package>
+ </packages>
+</scan>
+
+

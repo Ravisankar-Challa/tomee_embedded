@@ -2,11 +2,10 @@ package com.example.rest;
 
 import static net.javacrumbs.jsonunit.JsonAssert.assertJsonEquals;
 import static net.javacrumbs.jsonunit.JsonAssert.when;
-import static net.javacrumbs.jsonunit.core.Option.TREATING_NULL_AS_ABSENT;
-import static net.javacrumbs.jsonunit.core.Option.IGNORING_EXTRA_FIELDS;
-import static net.javacrumbs.jsonunit.core.Option.COMPARING_ONLY_STRUCTURE;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -15,19 +14,19 @@ import java.nio.file.Paths;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
-import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-
+import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import net.javacrumbs.jsonunit.core.Option;
+import static net.javacrumbs.jsonunit.core.Option.COMPARING_ONLY_STRUCTURE;
+import static net.javacrumbs.jsonunit.core.Option.TREATING_NULL_AS_ABSENT;
 
 @RunWith(Arquillian.class)
 public class StudentResourceITTest {
@@ -36,15 +35,14 @@ public class StudentResourceITTest {
 
 	@Deployment
 	public static WebArchive createDeployment() {
-		WebArchive webArchive = ShrinkWrap.create(WebArchive.class, "testtomee.war")
+		return ShrinkWrap.create(WebArchive.class, "testtomee.war")
 				 .addPackages(true, "com.example")
 				 .addAsWebInfResource("beans.xml")
 				 .addAsResource("META-INF/test-persistence.xml", "META-INF/persistence.xml")
 				 .addAsResource("test.properties")
-				 .addAsResource("base.properties");
-		webArchive.as(ZipExporter.class).exportTo(new File("/home/ravi/hello.war"), true);
-		return webArchive;
-	}
+				 .addAsResource("base.properties")
+				 .addAsLibraries(Maven.resolver().resolve("org.tomitribe:sabot:0.9").withTransitivity().asFile());
+		}
 	
 	@ArquillianResource
 	private URI baseUrl;
@@ -57,13 +55,29 @@ public class StudentResourceITTest {
 	}*/
 	
 	@Test
+	public void test_sabot() {
+		String response = client.target(baseUrl.toString()+"api/hello")
+								.request()
+								.get(String.class);
+		assertEquals("Hello World !!! Environment : test", response);
+	}
+	
+	@Test
 	public void test_find_student_by_id() {
 		String response = client.target(baseUrl.toString()+"api/student/{id}")
 								.resolveTemplate("id", 1)
 								.request()
 								.get(String.class);
 		String expected = readFile("student1.json");
-		assertJsonEquals(expected, response, when(Option.COMPARING_ONLY_STRUCTURE));
+		assertJsonEquals(expected, response, when(TREATING_NULL_AS_ABSENT));
+	}
+	
+	@Test
+	public void test_add_student() {
+		Response response = client.target(baseUrl.toString()+"api/student")
+								.request()
+								.post(Entity.json("{\"name\":\"Hello\"}"));
+		assertThat(response.getStatus(), equalTo(201));
 	}
 	
 	public String readFile(String fileName)  {

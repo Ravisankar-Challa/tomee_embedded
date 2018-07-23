@@ -1,14 +1,30 @@
 <arquillian xmlns="http://jboss.org/schema/arquillian"
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://jboss.org/schema/arquillian
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://jboss.org/schema/arquillian
         http://jboss.org/schema/arquillian/arquillian_1_0.xsd">
-
-
-  <container qualifier="tomee" default="true">
-    <configuration>
-      <property name="httpPort">-1</property>
-      <property name="stopPort">-1</property>
-      <property name="ajpPort">-1</property>
-    </configuration>
-  </container>
+	<container qualifier="tomee" default="true">
+		<configuration>
+			<property name="httpPort">-1</property>
+			<property name="stopPort">-1</property>
+			<property name="ajpPort">-1</property>
+			<property name="cleanOnStartUp">true</property>
+			<property name="properties">
+		        DefaultDataSource = new://Resource?type=DataSource
+		        DefaultDataSource.JdbcDriver = org.h2.Driver
+		        DefaultDataSource.JdbcUrl = jdbc:h2:mem:mydb
+		        DefaultDataSource.UserName = sa
+		        DefaultDataSource.Password = sa
+		      </property>
+		      <property name="additionalLibs">
+		      	mvn:com.h2database:h2:1.4.191
+		      </property>
+		</configuration>
+	</container>
+	<extension qualifier="cucumber">
+		<property name="report">true</property>
+		<!-- <property name="generateDocs">true</property> -->
+		<property name="report-directory">target/cucumber-report</property>
+		<!-- <property name="featureHome">src/test/resources/features</property> -->
+		<property name="tempDir">target/custom/features</property>
+	</extension>
 </arquillian>
